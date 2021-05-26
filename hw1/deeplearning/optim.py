@@ -100,7 +100,10 @@ def rmsprop(x, dx, config=None):
     # in the next_x variable. Don't forget to update cache value stored in      #
     # config['cache'] and to use the epsilon scalar to avoid dividing by zero.  #
     #############################################################################
-    pass
+    beta = config['decay_rate']
+    config['cache'] = beta * config['cache'] + (1 - beta) * dx ** 2
+    den = np.sqrt(config['cache'] + config['epsilon'])
+    next_x = x - config['learning_rate'] / den * dx
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
