@@ -316,7 +316,7 @@ def dropout_forward(x, dropout_param):
         # Store the dropout mask in the mask variable.                            #
         ###########################################################################
         # mask = (np.random.rand(*x.shape) < p) / p # p: keep a neuron.
-        mask = (np.random.rand(*x.shape) > p) / (1 - p) # p: drop a neuron. 
+        mask = (np.random.rand(*x.shape) > p) / (1 - p) # p: drop a neuron.
         out = mask * x
         ###########################################################################
         #                            END OF YOUR CODE                             #
@@ -383,7 +383,43 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Implement the convolutional forward pass.                           #
     # Hint: you can use the function np.pad for padding.                        #
     #############################################################################
-    pass
+    pad = conv_param['pad']
+    stride = conv_param['stride']
+    N, _, H, W = x.shape
+    F, _, HH, WW = w.shape
+    Ho = int(1 + (H + 2 * pad - HH) / stride)
+    Wo = int(1 + (W + 2 * pad - WW) / stride)
+
+    pad_dims = ((0, 0),
+                (0, 0),
+                (pad, pad),
+                (pad, pad))
+    x_pad = np.pad(x, pad_dims)
+    out = np.zeros((N, F, Ho, Wo))
+    cache = (x, w, b, conv_param)
+
+    # Vectorized filter multiplication
+    for i in range(Ho):
+        i_pad = i * stride
+        for j in range(Wo):
+            j_pad = j * stride
+            wa = w.reshape(F, -1)
+            xa = x_pad[..., i_pad:i_pad+HH, j_pad:j_pad+WW].reshape(N, -1)
+            out[..., i, j] = xa.dot(wa.T) + b
+
+    # Naive filter sum
+    # for i in range(Ho):
+    #     i_pad = i * stride
+    #     for j in range(Wo):
+    #         j_pad = j * stride
+    #         sum = 0
+    #         for l in range(HH):
+    #             for m in range(WW):
+    #                 wa = w[..., l, m]
+    #                 xa = x_pad[..., i_pad + l, j_pad + m]
+    #                 sum += xa.dot(wa.T)
+    #         out[..., i, j] = sum + b
+
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -408,7 +444,37 @@ def conv_backward_naive(dout, cache):
     #############################################################################
     # TODO: Implement the convolutional backward pass.                          #
     #############################################################################
-    pass
+    x, w, b, conv_param = cache
+
+    pad = conv_param['pad']
+    stride = conv_param['stride']
+    N, _, H, W = x.shape
+    F, C, HH, WW = w.shape
+    Ho = int(1 + (H + 2 * pad - HH) / stride)
+    Wo = int(1 + (W + 2 * pad - WW) / stride)
+
+    pad_dims = ((0, 0),
+                (0, 0),
+                (pad, pad),
+                (pad, pad))
+    x_pad = np.pad(x, pad_dims)
+
+    dx_pad = np.zeros(x_pad.shape)
+    dx = np.zeros(x.shape)
+    dw = np.zeros(w.shape)
+    db = np.sum(dout, axis=(0, 2, 3))
+
+    for i in range(0, Ho):
+        i_pad = i * stride
+        for j in range(0, Wo):
+            j_pad = j * stride
+            for l in range(HH):
+                for m in range(WW):
+                    xa = x_pad[..., i_pad + l, j_pad + m]
+                    dw[..., l, m] += dout[..., i, j].T.dot(xa)
+                    dx_pad[..., i_pad + l, j_pad + m] \
+                        += dout[..., i, j].dot(w[..., l, m])
+    dx = dx_pad[..., pad:-pad, pad:-pad]
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
