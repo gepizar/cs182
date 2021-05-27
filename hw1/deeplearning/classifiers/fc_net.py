@@ -249,7 +249,10 @@ class FullyConnectedNet(object):
             w = self.params[f'W{i}']
             b = self.params[f'b{i}']
             if self.use_batchnorm: 
-                pass
+                gamma = self.params[f'gamma{i}']
+                beta = self.params[f'beta{i}']
+                bn_param = self.bn_params[i-1]
+                X, cache[i] = affine_bn_relu_forward(X, w, b, gamma, beta, bn_param)
             else: 
                 X, cache[i] = affine_relu_forward(X, w, b)
             if self.use_dropout: 
@@ -298,7 +301,8 @@ class FullyConnectedNet(object):
             if self.use_dropout: 
                 pass
             if self.use_batchnorm:
-                pass
+                dx, grads[f'W{i}'], grads[f'b{i}'], grads[f'gamma{i}'], \
+                    grads[f'beta{i}'] = affine_bn_relu_backward(dx, cache[i])
             else: 
                 dx, grads[f'W{i}'], grads[f'b{i}'] = \
                     affine_relu_backward(dx, cache[i])
