@@ -500,7 +500,21 @@ def max_pool_forward_naive(x, pool_param):
     #############################################################################
     # TODO: Implement the max pooling forward pass                              #
     #############################################################################
-    pass
+    stride = pool_param['stride']
+    HH = pool_param['pool_height']
+    WW = pool_param['pool_width']
+    N, C, H, W = x.shape
+    Ho = int(1 + (H - HH) / stride)
+    Wo = int(1 + (H - WW) / stride)
+    out = np.zeros((N, C, Ho, Wo))
+
+    for i in range(Ho):
+        i_stride = i * stride 
+        for j in range(Wo):
+            j_stride = j * stride
+            xa = x[..., i_stride:i_stride+HH, j_stride:j_stride+WW]
+            out[..., i, j] = np.max(xa, axis=(2, 3))
+    cache = (x, pool_param)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -523,7 +537,25 @@ def max_pool_backward_naive(dout, cache):
     #############################################################################
     # TODO: Implement the max pooling backward pass                             #
     #############################################################################
-    pass
+    x, pool_param = cache
+
+    stride = pool_param['stride']
+    HH = pool_param['pool_height']
+    WW = pool_param['pool_width']
+    _, _, H, W = x.shape
+    Ho = int(1 + (H - HH) / stride)
+    Wo = int(1 + (W - WW) / stride)
+    dx = np.zeros(x.shape)
+
+    for i in range(Ho):
+        i_stride = i * stride
+        for j in range(Wo):
+            j_stride = j * stride
+            xa = x[..., i_stride:i_stride+HH, j_stride:j_stride+WW]
+            xmax = np.max(xa, axis=(2, 3), keepdims=True)
+            dxa = (xa >= xmax) 
+            do = dout[..., i, j, np.newaxis, np.newaxis]
+            dx[...,  i_stride:i_stride+HH, j_stride:j_stride+WW] = dxa * do
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
