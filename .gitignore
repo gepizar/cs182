@@ -2,3 +2,9 @@
 .vscode
 *.code-workspace
 *.ipynb_checkpoints
+
+build/
+__pycache__/
+submission_logs/
+hw1/deeplearning/im2col_cython.cpython-37m-darwin.so
+
