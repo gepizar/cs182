@@ -1,5 +1,5 @@
 import numpy as np
-
+     
 
 """
 This file defines layer types that are commonly used for recurrent neural
@@ -100,7 +100,16 @@ def rnn_forward(x, h0, Wx, Wh, b):
     # input data. You should use the rnn_step_forward function that you defined  #
     # above. You can use a for loop to help compute the forward pass.            #
     ##############################################################################
-    pass
+    T = x.shape[1]
+    N, H = h0.shape
+    cache = []
+    h = np.zeros((N, T, H))
+    h_t = h0 
+    
+    for t in range(T):
+        h_t, cache_t = rnn_step_forward(x[:, t, :], h_t, Wx, Wh, b)
+        h[:, t, :] = h_t
+        cache.append(cache_t)
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
@@ -127,7 +136,23 @@ def rnn_backward(dh, cache):
     # sequence of data. You should use the rnn_step_backward function that you   #
     # defined above. You can use a for loop to help compute the backward pass.   #
     ##############################################################################
-    pass
+    x, prev_h, Wx, Wh, _ = cache[-1]
+    N, T, H = dh.shape
+    D = x.shape[1]
+    dx = np.zeros((N, T, D))
+    dWx = np.zeros_like(Wx)
+    dWh = np.zeros_like(Wh)
+    db = np.zeros(H)
+    dprev_h = np.zeros_like(prev_h)
+
+    for t in reversed(range(T)): 
+        dnext_h = dh[:, t, :] + dprev_h
+        dx_aux, dprev_h, dWx_aux, dWh_aux, db_aux = rnn_step_backward(dnext_h, cache[t])
+        dx[:, t, :] = dx_aux
+        dWx += dWx_aux
+        dWh += dWh_aux
+        db += db_aux
+    dh0 = dprev_h
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
