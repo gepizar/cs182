@@ -258,7 +258,18 @@ def lstm_step_forward(x, prev_h, prev_c, Wx, Wh, b):
     # TODO: Implement the forward pass for a single timestep of an LSTM.        #
     # You may want to use the numerically stable sigmoid implementation above.  #
     #############################################################################
-    pass
+    H = prev_h.shape[1]
+    
+    a = x.dot(Wx) + prev_h.dot(Wh) + b
+    i = sigmoid(a[:, :H]) # sigmoid(ai)
+    f = sigmoid(a[:, H:2*H]) # sigmoid(af)
+    o = sigmoid(a[:, 2*H:3*H]) # sigmoid(ao)
+    g = np.tanh(a[:, 3*H:]) # tanh(ag)
+
+    next_c = f * prev_c + i * g
+    next_h = o * np.tanh(next_c)
+
+    cache = (x, prev_h, prev_c, Wx, Wh, next_c, i, f, o, g)
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
@@ -290,7 +301,97 @@ def lstm_step_backward(dnext_h, dnext_c, cache):
     # HINT: For sigmoid and tanh you can compute local derivatives in terms of  #
     # the output value from the nonlinearity.                                   #
     #############################################################################
-    pass
+    ## Compact back prop
+    x, prev_h, prev_c, Wx, Wh, next_c, i, f, o, g = cache
+    H = dnext_h.shape[1]
+
+    tanhc = np.tanh(next_c)
+    dnext_c += o * (1 - tanhc ** 2) * dnext_h
+
+    di = g * dnext_c
+    df = prev_c * dnext_c
+    do = tanhc * dnext_h
+    dg = i * dnext_c
+    
+    dai = i * (1 - i) * di
+    daf = f * (1 - f) * df
+    dao = o * (1 - o) * do
+    dag = (1 - g ** 2) * dg
+    da = np.concatenate([dai, daf, dao, dag], axis=1)
+
+    dx = da.dot(Wx.T)
+    dprev_h = da.dot(Wh.T)
+    dprev_c = f * dnext_c
+    dWx = x.T.dot(da)
+    dWh = prev_h.T.dot(da)
+    db = da.sum(axis=0)
+
+    ## Detailed Backprop 
+    # x, prev_h, prev_c, Wx, Wh, next_c, i, f, o, g = cache
+    # H = dnext_h.shape[1]
+
+    # tanhc = np.tanh(next_c)
+    # dnext_c += o * (1 - tanhc ** 2) * dnext_h
+    
+    # dWx = np.zeros_like(Wx)
+    # dWh = np.zeros_like(Wh)
+    # db = np.zeros(4*H)
+
+    # Wxi, Wxf, Wxo, Wxg = Wx[:, :H], Wx[:, H:2*H], Wx[:, 2*H:3*H], Wx[:, 3*H:]
+    # Whi, Whf, Who, Whg = Wh[:, :H], Wh[:, H:2*H], Wh[:, 2*H:3*H], Wh[:, 3*H:]
+
+    # di = g * dnext_c
+    # dai = i * (1 - i) * di
+    # dxi = dai.dot(Wxi.T)
+    # dhi = dai.dot(Whi.T)
+    # dWxi = x.T.dot(dai)
+    # dWhi = prev_h.T.dot(dai)
+    # dbi = dai.sum(axis=0)
+
+    # df = prev_c * dnext_c
+    # daf = f * (1 - f) * df
+    # dxf = daf.dot(Wxf.T)
+    # dhf = daf.dot(Whf.T)
+    # dWxf = x.T.dot(daf)
+    # dWhf = prev_h.T.dot(daf)
+    # dbf = daf.sum(axis=0)
+
+    # do = tanhc * dnext_h
+    # dao = o * (1 - o) * do
+    # dxo = dao.dot(Wxo.T)
+    # dho = dao.dot(Who.T)
+    # dWxo = x.T.dot(dao)
+    # dWho = prev_h.T.dot(dao)
+    # dbo = dao.sum(axis=0)
+    
+    # dg = i * dnext_c
+    # dag = (1 - g ** 2) * dg
+    # dxg = dag.dot(Wxg.T)
+    # dhg = dag.dot(Whg.T)
+    # dWxg = x.T.dot(dag)
+    # dWhg = prev_h.T.dot(dag)
+    # dbg = dag.sum(axis=0)
+
+    # dx = dxi + dxf + dxo + dxg
+    # dprev_h = dhi + dhf + dho + dhg
+    
+    # dWx[:, 0*H:1*H] = dWxi
+    # dWx[:, 1*H:2*H] = dWxf
+    # dWx[:, 2*H:3*H] = dWxo
+    # dWx[:, 3*H:4*H] = dWxg
+
+    # dWh[:, 0*H:1*H] = dWhi
+    # dWh[:, 1*H:2*H] = dWhf
+    # dWh[:, 2*H:3*H] = dWho
+    # dWh[:, 3*H:4*H] = dWhg
+
+    # db[0*H:1*H] = dbi
+    # db[1*H:2*H] = dbf
+    # db[2*H:3*H] = dbo
+    # db[3*H:4*H] = dbg
+
+    # dprev_c = f * dnext_c
+
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
