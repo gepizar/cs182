@@ -80,7 +80,23 @@ def make_fooling_image(X, target_y, model):
     # in fewer than 100 iterations of gradient ascent.                           #
     # You can print your progress over iterations to check your algorithm.       #
     ##############################################################################
-    pass
+    for i in range(100): 
+        # Forward prop.
+        scores = model(X_fooling)
+        # Get the predicted category
+        pred_y = scores.argmax(1)
+        
+        # Check if the model is fooled
+        if pred_y != target_y:
+            # Backprop and train for the desired category. 
+            scores[:, target_y].backward()
+            g = X_fooling.grad.data
+            dx = learning_rate * g / torch.norm(g)
+            X_fooling.data += dx.data
+            X_fooling.grad.data.zero_()
+        else: 
+            break
+    
     ##############################################################################
     #                             END OF YOUR CODE                               #
     ##############################################################################
