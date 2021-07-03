@@ -31,7 +31,18 @@ def compute_saliency_maps(X, y, model):
     # to each input image. You first want to compute the loss over the correct   #
     # scores, and then compute the gradients with torch.autograd.gard.           #
     ##############################################################################
-    pass
+    
+    # Forward Pass and get the correct class
+    scores = model(X)
+    scores = scores.gather(1, y.view(-1, 1)).squeeze()
+
+    # Backprop the gradients
+    scores.backward(torch.ones_like(scores))
+
+    # Get the gradients, take the absolute value and then compute the max pixel 
+    # within pixels. 
+    saliency = X.grad.data.abs().max(1)[0]
+
     ##############################################################################
     #                             END OF YOUR CODE                               #
     ##############################################################################
