@@ -43,7 +43,13 @@ def gram_matrix(features, normalize=True):
     ##############################################################################
     #                               YOUR CODE HERE                               #
     ##############################################################################
-    return None
+    N, C, H, W = features.shape
+    features = features.reshape(N, C, -1)
+    f = features.matmul(features.transpose(2, 1))
+    if normalize: 
+        return f / (H * W * C)
+    else: 
+        return f
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
