@@ -78,7 +78,12 @@ def style_loss(feats, style_layers, style_targets, style_weights):
     ##############################################################################
     #                               YOUR CODE HERE                               #
     ##############################################################################
-    return None
+    loss = 0.0
+    for i, l in enumerate(style_layers): 
+        gram_G = gram_matrix(feats[l])
+        gram_A = style_targets[i]
+        loss += style_weights[i] * (gram_G - gram_A).pow(2).sum()
+    return loss
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
