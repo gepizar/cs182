@@ -117,16 +117,16 @@ class TransformerEncoderBlock(nn.Module):
         # Perform a multi-headed self-attention across the inputs.
 
         # First normalize the input with the LayerNorm initialized in the __init__ function (self.norm)
-        norm_inputs = None #TODO
+        norm_inputs = self.norm(inputs)
 
         # Apply the self-attention with the normalized input, use the self_attention mask as the optional mask parameter.
-        attn = None #TODO
+        attn = self.self_attention((norm_inputs, norm_inputs), self_attention_mask)
         
         # Apply the residual connection. res_attn should sum the attention output and the original, non-normalized inputs
-        res_attn = None #TODO # Residual connection of the attention block
+        res_attn = inputs + attn # Residual connection of the attention block
 
         # output passes through a feed_forward network
-        output = None #TODO
+        output = self.feed_forward(res_attn)
         return output
 
 
