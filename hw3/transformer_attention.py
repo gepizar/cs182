@@ -103,11 +103,11 @@ class MultiHeadProjection(nn.Module):
         batch_size, tensorlen = tensor.shape[0], tensor.shape[1]
         feature_size = tensor.shape[2]
 
-        new_feature_size = None #TODO # Compute what the feature size per head is.
+        new_feature_size = int(feature_size / self.n_heads) #TODO # Compute what the feature size per head is.
         # Reshape this projection tensor so that it has n_heads, each of new_feature_size
-        tensor = None #TODO
+        tensor = tensor.reshape(batch_size, tensorlen, self.n_heads, new_feature_size) #TODO
         # Transpose the matrix so the outer-dimensions are the batch-size and the number of heads
-        tensor = None #TODO
+        tensor = tensor.transpose(1, 2) #TODO
         return tensor
         ##########################################################################################
 
@@ -118,12 +118,12 @@ class MultiHeadProjection(nn.Module):
         # You are given the output from all the heads, and you must combine them back into 1 rank-3 matrix
 
         # Transpose back compared to the split, so that the outer dimensions are batch_size and sequence_length again
-        tensor = None #TODO
+        tensor = tensor.transpose(1, 2) #TODO
         batch_size, tensorlen = tensor.shape[0], tensor.shape[1]
         feature_size = tensor.shape[-1]
 
-        new_feature_size = None #TODO # What is the new feature size, if we combine all the heads
-        tensor = None #TODO # Reshape the Tensor to remove the heads dimension and come back to a Rank-3 tensor
+        new_feature_size = int(feature_size * self.n_heads) #TODO # What is the new feature size, if we combine all the heads
+        tensor = tensor.reshape(batch_size, tensorlen, new_feature_size) #TODO # Reshape the Tensor to remove the heads dimension and come back to a Rank-3 tensor
         return tensor
         ##########################################################################################
 
