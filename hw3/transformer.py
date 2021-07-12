@@ -166,10 +166,10 @@ class TransformerDecoderBlock(nn.Module):
         # mask to control for the future outputs.
         # This generates a tensor of size [batch_size x target_len x d_model]
 
-        norm_decoder_inputs = None #TODO
+        norm_decoder_inputs = self.self_norm(decoder_inputs)
 
-        target_selfattn = None #TODO
-        res_target_self_attn = None #TODO
+        target_selfattn = self.self_attention((norm_decoder_inputs, norm_decoder_inputs), self_attention_mask)
+        res_target_self_attn = decoder_inputs + target_selfattn
 
         # Compute the attention using the keys/values from the encoder, and the query from the
         # decoder. This takes the encoder output of size [batch_size x source_len x d_model] and the
@@ -177,13 +177,13 @@ class TransformerDecoderBlock(nn.Module):
         # a multi-headed attention across them, giving an output of [batch_size x target_len x d_model]
         # using the encoder as the keys and values and the target as the queries
 
-        norm_target_selfattn = None #TODO
-        norm_encoder_outputs = None #TODO
-        encdec_attention = None #TODO
+        norm_target_selfattn = self.cross_norm_target(res_target_self_attn)
+        norm_encoder_outputs = self.cross_norm_source(encoder_outputs)
+        encdec_attention = self.cross_attention((norm_target_selfattn, norm_encoder_outputs), cross_attention_mask)
         # Take the residual between the output and the unnormalized target input of the cross-attention
-        res_encdec_attention = None #TODO
+        res_encdec_attention = res_target_self_attn + encdec_attention
 
-        output = None #TODO
+        output = self.feed_forward(res_encdec_attention)
 
         return output
 
