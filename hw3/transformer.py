@@ -50,16 +50,16 @@ class PositionEmbedding(nn.Module):
 
         # create the position embedding as described in the paper
         # use the `divisor` attribute instantiated in __init__ 
-        sin_embedding = None # TODO
-        cos_embedding = None # TODO
+        sin_embedding = th.sin(index / self.divisor)
+        cos_embedding = th.cos(index / self.divisor)
 
         # interleave the sin and cos. For more info see:
         # https://discuss.pytorch.org/t/how-to-interleave-two-tensors-along-certain-dimension/11332/3
-        position_shape = None #TODO (1, , ) # fill in the other two dimensions
+        position_shape = (1, sequence_length, self.hidden_size) # fill in the other two dimensions
         position_embedding = th.stack((sin_embedding,cos_embedding), dim=3).view(position_shape)
 
         pos_embed_deviced = position_embedding.to(get_device())
-        return  # add the embedding to the input
+        return inputs + pos_embed_deviced # add the embedding to the input
         ####################################  END OF YOUR CODE  ##################################
 
 class TransformerFeedForward(nn.Module):
