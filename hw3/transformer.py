@@ -84,10 +84,10 @@ class TransformerFeedForward(nn.Module):
         ####################################  YOUR CODE HERE  ####################################
         # PART 4.1: Implement the FeedForward Layer.
         # As seen in fig1, the feedforward layer includes a normalization and residual
-        norm_input = None #TODO
-        dense_out = None #TODO
-        dense_drop = None #TODO # Add the dropout here
-        return None #TODO # Add the residual here
+        norm_input = self.norm(inputs)
+        dense_out = self.feed_forward(norm_input) 
+        dense_drop = self.dropout(dense_out) # Add the dropout here
+        return inputs + dense_drop # Add the residual here
         ####################################  END OF YOUR CODE  ##################################
 
 
@@ -121,7 +121,7 @@ class TransformerEncoderBlock(nn.Module):
 
         # Apply the self-attention with the normalized input, use the self_attention mask as the optional mask parameter.
         attn = None #TODO
-
+        
         # Apply the residual connection. res_attn should sum the attention output and the original, non-normalized inputs
         res_attn = None #TODO # Residual connection of the attention block
 
