@@ -424,7 +424,7 @@ class Transformer(nn.Module):
         # PART 5: Implement the full Transformer block
 
         # Using the self.encoder, encode the source_sequence, and provide the encoder_mask variable as the optional mask.
-        encoder_output = None #TODO
+        encoder_output = self.encoder(source_sequence, encoder_mask=encoder_mask)
 
         # Finally, we need to do a decoding this should generate a
         # tensor of shape [batch_size x target_length x d_model]
@@ -433,6 +433,11 @@ class Transformer(nn.Module):
         # As usual, provide it with the encoder and decoder_masks
         # Finally, You should also pass it these two optional arguments:
         # shift_target_sequence_right=shift_target_sequence_right, mask_future=mask_future
-        decoder_output = None #TODO
+        decoder_output = self.decoder(target_sequence, encoder_output, 
+            encoder_mask=encoder_mask, 
+            decoder_mask=decoder_mask, 
+            mask_future=mask_future,
+            shift_target_sequence_right=shift_target_sequence_right
+        )
 
         return decoder_output # We return the decoder's output
