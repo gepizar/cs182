@@ -138,7 +138,8 @@ class MLPPolicySL(MLPPolicy):
         expert actions under the policy.
         Hint: look at the documentation for torch.distributions 
         """
-        loss = None
+        loss = - self(observations).log_prob(actions).mean()
+        # self(observations) equivalent to self.forward(observations)
         """
         END CODE
         """
