@@ -257,7 +257,8 @@ class RL_Trainer(object):
         Hint: use expert_policy.get_action to query the expert on an array of 
         observations.
         """
-        paths = paths
+        for path in paths:
+            path['action'] = expert_policy.get_action(path['observation'])
         """
         END CODE
         """
