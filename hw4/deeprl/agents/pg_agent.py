@@ -130,7 +130,8 @@ class PGAgent(BaseAgent):
         TODO: Return a numpy array containing the returns for this trajectory.
         All entries in this array should be identical.
         """
-        discounted_returns = None
+        discounted_returns = np.array([self.gamma ** t * r for t, r in enumerate(rewards)])
+        list_of_discounted_returns = np.ones_like(discounted_returns) * (discounted_returns.sum())
         """
         END CODE
         """
@@ -149,7 +150,13 @@ class PGAgent(BaseAgent):
         indices [t, T] instead of [0, T].
         Using a for loop is fine, no need to vectorize this (though you can).
         """
-        list_of_discounted_cumsums = None
+        T = len(rewards)
+        list_of_discounted_cumsums = np.zeros((T))
+        cumsum = 0
+        for t in reversed(range(T)):
+            cumsum *= self.gamma
+            cumsum += rewards[t]
+            list_of_discounted_cumsums[t] = cumsum
         """
         END CODE
         """
