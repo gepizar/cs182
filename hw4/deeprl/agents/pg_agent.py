@@ -89,7 +89,7 @@ class PGAgent(BaseAgent):
             """
             TODO: compute advantage estimates using q_values and baselines
             """
-            advantages = None
+            advantages = q_values - baselines
             """
             END CODE
             """
