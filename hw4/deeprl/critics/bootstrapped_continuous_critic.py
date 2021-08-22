@@ -91,8 +91,8 @@ class BootstrappedContinuousCritic(nn.Module, BaseCritic):
         """
         with torch.no_grad(): 
             for p, target_p in zip(self.critic_network.parameters(), self.target_network.parameters()):
-               target_p *= (1 - self.target_update_rate)
-               target_p += self.target_update_rate * p
+               weights = (1 - self.target_update_rate) * target_p + self.target_update_rate * p
+               target_p.copy_(weights)
         """
         END CODE
         """
