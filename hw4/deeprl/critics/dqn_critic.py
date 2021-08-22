@@ -80,7 +80,9 @@ class DQNCritic(BaseCritic):
             """
             TODO: compute the value of of the next state
             """
-            # your code here
+            next_qa_t_values = self.q_net_target(next_ob_no).detach()
+            next_q_t_values = next_qa_t_values.max(-1)[0]
+            next_q_t_values[terminal_n.bool()] = 0.0
             """
             END CODE
             """
@@ -90,7 +92,7 @@ class DQNCritic(BaseCritic):
         are passed through the target values.
         Hint: Use torch.no_grad or .detach() to ensure no gradients are passed.
         """
-        target = None
+        target = reward_n + self.gamma * next_q_t_values
         """
         END CODE
         """
