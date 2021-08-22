@@ -72,7 +72,10 @@ class DQNCritic(BaseCritic):
             is obtained from the target Q-network. See page 5 of 
             https://arxiv.org/pdf/1509.06461.pdf for more details.
             """
-            # your code here
+            next_ac = self.q_net(next_ob_no).max(-1)[1]
+            next_qa_t_values = self.q_net_target(next_ob_no)
+            next_q_t_values = torch.gather(next_qa_t_values, 1, next_ac.unsqueeze(1)).squeeze(1)
+            next_q_t_values[terminal_n.bool()] = 0.0
             """
             END CODE
             """
@@ -80,7 +83,7 @@ class DQNCritic(BaseCritic):
             """
             TODO: compute the value of of the next state
             """
-            next_qa_t_values = self.q_net_target(next_ob_no).detach()
+            next_qa_t_values = self.q_net_target(next_ob_no)
             next_q_t_values = next_qa_t_values.max(-1)[0]
             next_q_t_values[terminal_n.bool()] = 0.0
             """
@@ -92,7 +95,8 @@ class DQNCritic(BaseCritic):
         are passed through the target values.
         Hint: Use torch.no_grad or .detach() to ensure no gradients are passed.
         """
-        target = reward_n + self.gamma * next_q_t_values
+        with torch.no_grad(): 
+            target = reward_n + self.gamma * next_q_t_values
         """
         END CODE
         """
