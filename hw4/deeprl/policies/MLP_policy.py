@@ -234,7 +234,8 @@ class MLPPolicyAC(MLPPolicy):
         distributions, look at the rsample function to differentiate through 
         samples from the action distribution.
         """
-        loss = None
+        acts = self(observations).rsample()
+        loss = - critic(observations, acts).mean()
         """
         END CODE
         """
